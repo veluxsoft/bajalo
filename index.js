@@ -8,6 +8,7 @@ const {
   solveTurnstileCapSolver,
   injectTurnstileToken,
 } = require('./chrome-helper');
+const { ejecutarPruebaCajaChica } = require('./caja-chica-test');
 
 const LOGIN_URL = process.env.LOGIN_URL || 'https://subelo.lol/login';
 const USER = process.env.SUBELO_USER;
@@ -16,6 +17,7 @@ const SITEKEY = process.env.TURNSTILE_SITEKEY || '0x4AAAAAAEzWu-1po3ovlJXX';
 const CAPSOLVER_API_KEY = process.env.CAPSOLVER_API_KEY || '';
 const CDP_PORT = Number(process.env.CDP_PORT || 9222);
 const KEEP_OPEN_MS = Number(process.env.KEEP_OPEN_MS || 8000);
+
 
 if (!USER || !PASS) {
   console.error('Faltan SUBELO_USER o SUBELO_PASS en el archivo .env');
@@ -114,9 +116,16 @@ async function login() {
     await solveTurnstileFast(page);
 
     console.log('Entrando...');
-    await page.locator('form button[type="submit"]').click();
 
-    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => null);
+await page.locator('form button[type="submit"]').click();
+
+await page.waitForLoadState('networkidle', {
+  timeout: 30000,
+}).catch(() => null);
+
+console.log(`Login completado. URL: ${page.url()}`);
+
+await ejecutarPruebaCajaChica(page);
     await page.screenshot({ path: path.join(screenshotsDir, 'despues-entrar.png'), fullPage: true }).catch(() => {});
 
     console.log(`Listo. URL: ${page.url()}`);
